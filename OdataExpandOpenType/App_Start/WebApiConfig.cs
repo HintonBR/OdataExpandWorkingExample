@@ -24,8 +24,8 @@
             builder.EntitySet<Person>("Persons");
 
             config.MapODataServiceRoute("ODataRoute", "api", builder.GetEdmModel());
-            var odataFormatters = ODataMediaTypeFormatters.Create(new CustomODataSerializerProvider(), new DefaultODataDeserializerProvider());
-            config.Formatters.InsertRange(0, odataFormatters);
+            //var odataFormatters = ODataMediaTypeFormatters.Create(new CustomODataSerializerProvider(), new DefaultODataDeserializerProvider());
+            //config.Formatters.InsertRange(0, odataFormatters);
             
             config.EnsureInitialized();
             config.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;

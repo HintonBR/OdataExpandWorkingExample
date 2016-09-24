@@ -1,4 +1,9 @@
-﻿namespace OdataExpandOpenType.Controllers
+﻿using System.Collections.Generic;
+using System.Net.Http;
+using System.Web.OData.Extensions;
+using Microsoft.Data.OData.Query.SemanticAst;
+
+namespace OdataExpandOpenType.Controllers
 {
     using System;
     using System.Data.Entity;
@@ -25,21 +30,32 @@
         [ResponseType(typeof(IQueryable<Person>))]
         [ODataRoute("Persons")]
         [Route("api/Persons")]
-        public IHttpActionResult Get(ODataQueryOptions<Person> options)
+        public IHttpActionResult Get()
         {
+            var urlpath = this.Request.GetQueryNameValuePairs()
+                .Where(item => item.Key == "$expand");
+            var expandSegment = urlpath as IList<KeyValuePair<string, string>> ?? urlpath.ToList();
+            if (expandSegment.Count() > 1) throw new Exception($"Only expected to find $expand once in the URL but found {expandSegment.Count()}");
+           
+            if (!expandSegment.Any())
+            {
+                this.Request.RequestUri = new Uri(this.Request.RequestUri.AbsoluteUri + "?$expand=Attributes");
+            }
+            else
+            {
+                var segment = expandSegment.First();
+                var expandSegmentAsUrl = expandSegment.Select(item => item.Key + "=" + item.Value).First();
+                var childrenExpandsWithAttributes =
+                    string.Join(",", segment.Value.Split(',').Select(item => item + "($expand=Attributes)"));
+                var newExpandSegmentAsUrl = segment.Key + "=Attributes," + childrenExpandsWithAttributes;
+                //TODO:This needs to be smart enough to handle sub expands so probably more like a regex with a begin that is &$expand or ?$expand
+                //we also should navigate the children $expands and add attributes
+                this.Request.RequestUri = new Uri(this.Request.RequestUri.AbsoluteUri.Replace(expandSegmentAsUrl, newExpandSegmentAsUrl));
+            }
+
             var persons = this.dbContext.Persons;
             
             return this.Ok(persons);
-            //            var expand =  ("Attributes," + options.RawValues.Expand);
-            //            var expandQueryOption = new SelectExpandQueryOption(options.RawValues.Select, expand, options.Context);
-            //            var childProp = typeof(ODataQueryOptions<Person>).GetProperty(nameof(options.SelectExpand));
-            //            var parentProp = childProp.DeclaringType.GetProperty(nameof(options.SelectExpand));
-            //            parentProp.SetValue(options, expandQueryOption, null);
-            //
-            //            options.RawValues.SetPrivatePropertyValue(nameof(options.RawValues.Expand), expand);
-            //
-            //            IQueryable result = options.ApplyTo(persons);
-            //            return this.Ok(result);
         }
 
         [HttpPost]
