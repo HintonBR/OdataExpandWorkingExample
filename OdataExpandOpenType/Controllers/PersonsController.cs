@@ -39,7 +39,7 @@ namespace OdataExpandOpenType.Controllers
            
             if (!expandSegment.Any())
             {
-                this.Request.RequestUri = new Uri(this.Request.RequestUri.AbsoluteUri + "?$expand=Attributes");
+                this.Request.RequestUri = new Uri(this.Request.RequestUri.AbsoluteUri + (this.Request.GetQueryNameValuePairs().Count() == 0 ? "?" : "&") + "$expand=Attributes");
             }
             else
             {

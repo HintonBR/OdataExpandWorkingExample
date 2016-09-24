@@ -13,7 +13,7 @@
         </p>
         <p>
             <a id="get-filtered" class="btn btn-danger">Get People Filtered</a>
-            <input id="filter" type="text" class="form-control" value="1" />
+            <input id="filter" type="text" class="form-control" value="linus" />
         </p>
         <p>
             <a id="get-expanded" class="btn btn-primary">Get People Expanded</a>
@@ -46,7 +46,7 @@
             var get = function (nameFilter) {
                 var url = baseUrl + "api/Persons";
                 if (nameFilter) {
-                    url = url + "?$filter=contains(Phone,'" + nameFilter + "')";
+                    url = url + "?$filter=contains(Name,'" + nameFilter + "')";
                 }
                 showResults($.ajax({
                     url: url,
